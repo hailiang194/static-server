@@ -24,21 +24,44 @@ static void fn(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
     }
 }
 
-int main(void)
+static void usage(const char *prog) {
+  fprintf(stderr, "Usage: OPTIONS\n\t-p [port] - set port\n");
+  exit(EXIT_FAILURE);
+}
+
+int main(int argc, char *argv[])
 {
-    const char* s_listening_address = "0.0.0.0:8080";
+    char s_listening_address[13] = "0.0.0.0:";
     struct mg_mgr mgr;
     struct mg_connection *c;
+    int i;
+    // Parse command-line flags
+    if(argc == 1)
+    {
+        usage(argv[0]);
+    }
+    for (i = 1; i < argc; i++)
+    {
+        if (strcmp(argv[i], "-p") == 0)
+        {
+            strcat(s_listening_address, argv[++i]);
+        }
+        else
+        {
+            usage(argv[0]);
+        }
+    }
+    
 
     signal(SIGINT, sighandler);
     signal(SIGTERM, sighandler);
-    
+
     mg_log_set(4);
     mg_mgr_init(&mgr);
     if ((c = mg_http_listen(&mgr, s_listening_address, fn, &mgr)) == NULL)
     {
         MG_ERROR(("Cannot listen on %s. Use http://ADDR:PORT or :PORT",
-                       s_listening_address));
+                  s_listening_address));
         exit(EXIT_FAILURE);
     }
     c->is_hexdumping = 1;
