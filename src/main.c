@@ -16,6 +16,7 @@ static void fn(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
     struct mg_http_serve_opts opts = {0}; // Serve local dir
     opts.root_dir = "./static";
     opts.mime_types = "wasm=application/wasm";
+    opts.extra_headers = "Access-Control-Allow-Origin: *\r\n";
     if (ev == MG_EV_HTTP_MSG)
     {
         MG_INFO(("New request to: [%.*s], body size: %lu", (int)hm->uri.len,
