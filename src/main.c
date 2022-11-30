@@ -4,6 +4,7 @@
 #include "mongoose.h"
 
 static int s_signo;
+static char* s_static_path;
 
 void sighandler(int signum)
 {
@@ -14,7 +15,7 @@ static void fn(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
 {
     struct mg_http_message *hm = (struct mg_http_message *)ev_data;
     struct mg_http_serve_opts opts = {0}; // Serve local dir
-    opts.root_dir = "./static";
+    opts.root_dir = s_static_path; //"./static";
     opts.mime_types = "wasm=application/wasm";
     opts.extra_headers = "Access-Control-Allow-Origin: *\r\n";
     if (ev == MG_EV_HTTP_MSG)
@@ -47,6 +48,10 @@ int main(int argc, char *argv[])
         {
             strcat(s_listening_address, argv[++i]);
         }
+		else if(strcmp(argv[i], "-s") == 0)
+		{
+			s_static_path = argv[++i];
+		}
         else
         {
             usage(argv[0]);
