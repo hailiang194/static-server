@@ -27,7 +27,7 @@ static void fn(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
 }
 
 static void usage(const char *prog) {
-  fprintf(stderr, "Usage: OPTIONS\n\t-p [port] - set port\n");
+  fprintf(stderr, "Usage: OPTIONS\n\t-p [port] - set port\n\t-s [path] - set static path\n");
   exit(EXIT_FAILURE);
 }
 
