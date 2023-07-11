@@ -27,7 +27,15 @@ static void fn(struct mg_connection *c, int ev, void *ev_data, void *fn_data)
 }
 
 static void usage(const char *prog) {
-  fprintf(stderr, "Usage: OPTIONS\n\t-p [port] - set port\n\t-s [path] - set static path\n");
+  fprintf(stderr, "Usage: OPTIONS\n");
+  fprintf(stderr, "\t-p [port] - set port\n");
+  fprintf(stderr, "\t-s [path] - set static path\n");
+  fprintf(stderr, "\t-l [logging level] - set logging level\n");
+  fprintf(stderr, "\t\t0 - Disable logging\n");
+  fprintf(stderr, "\t\t1 - Log errors only\n");
+  fprintf(stderr, "\t\t2 - Log errors and info messages\n");
+  fprintf(stderr, "\t\t3 - Log errors, info and debug messages\n");
+  fprintf(stderr, "\t\t4 - Log everything\n");
   exit(EXIT_FAILURE);
 }
 
@@ -37,6 +45,7 @@ int main(int argc, char *argv[])
     struct mg_mgr mgr;
     struct mg_connection *c;
     int i;
+    int logLevel = 0;
     // Parse command-line flags
     if(argc == 1)
     {
@@ -52,6 +61,10 @@ int main(int argc, char *argv[])
 		{
 			s_static_path = argv[++i];
 		}
+        else if(strcmp(argv[i], "-l") == 0)
+		{
+			logLevel = strtol(argv[++i], NULL, 10);
+		}
         else
         {
             usage(argv[0]);
@@ -62,7 +75,7 @@ int main(int argc, char *argv[])
     signal(SIGINT, sighandler);
     signal(SIGTERM, sighandler);
 
-    mg_log_set(4);
+    mg_log_set(logLevel);
     mg_mgr_init(&mgr);
     if ((c = mg_http_listen(&mgr, s_listening_address, fn, &mgr)) == NULL)
     {
@@ -70,7 +83,7 @@ int main(int argc, char *argv[])
                   s_listening_address));
         exit(EXIT_FAILURE);
     }
-    c->is_hexdumping = 1;
+    c->is_hexdumping = (logLevel == 4);
     while (s_signo == 0)
         mg_mgr_poll(&mgr, 1000); // Block forever
     mg_mgr_free(&mgr);
